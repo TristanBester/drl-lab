@@ -8,6 +8,10 @@ packages = [{include = "drl_lab"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+numpy = "^1.26.4"
+torch = "^2.3.0"
+torchvision = "^0.18.0"
+torchaudio = "^2.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
