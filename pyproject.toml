@@ -12,6 +12,8 @@ numpy = "^1.26.4"
 torch = "^2.3.0"
 torchvision = "^0.18.0"
 torchaudio = "^2.3.0"
+gymnasium = {extras = ["classic-control"], version = "^0.29.1"}
+cpprb = "^10.7.2"
 
 
 [tool.poetry.group.dev.dependencies]
