@@ -19,6 +19,6 @@ class ValueAgent(Agent):
     def __call__(self, obs: torch.Tensor) -> torch.Tensor:
         obs = obs.to(self.device)
         q_values = self.value_net(obs)
-        q_values = q_values.cpu().numpy()
         actions = self.action_selector(q_values)
+        actions = actions.cpu().numpy()
         return actions

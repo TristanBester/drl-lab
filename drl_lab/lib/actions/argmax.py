@@ -5,4 +5,7 @@ import torch
 class ArgmaxActionSelector(ActionSelector):
     def __call__(self, info: torch.Tensor) -> torch.Tensor:
         """Reuturn the index of the maximum value in the array."""
-        return torch.argmax(info, dim=-1)
+
+        print(info, torch.argmax(info))
+
+        return torch.argmax(info)

@@ -10,6 +10,7 @@ class EpsilonGreedyActionSelector(ActionSelector):
     def __call__(self, info: torch.Tensor) -> torch.Tensor:
         """Select an action based on the given information."""
         if np.random.random() < self.epsilon:
-            return torch.randint(info.size(-1), (info.size(0),))
+            action = torch.randint(2, (1,))[0]
+            return action
         else:
-            return torch.argmax(info, dim=-1)
+            return torch.argmax(info)
