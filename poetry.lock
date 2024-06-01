@@ -526,6 +526,18 @@ files = [
 ]
 
 [[package]]
+name = "packaging"
+version = "24.0"
+description = "Core utilities for Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "packaging-24.0-py3-none-any.whl", hash = "sha256:2ddfb553fdf02fb784c234c7ba6ccc288296ceabec964ad2eae3777778130bc5"},
+    {file = "packaging-24.0.tar.gz", hash = "sha256:eb82c5e3e56209074766e6885bb04b8c38a0c015d0a30036ebe7ece34c9989e9"},
+]
+
+[[package]]
 name = "pillow"
 version = "10.3.0"
 description = "Python Imaging Library (Fork)"
@@ -697,6 +709,22 @@ nodeenv = ">=1.6.0"
 [package.extras]
 all = ["twine (>=3.4.1)"]
 dev = ["twine (>=3.4.1)"]
+
+[[package]]
+name = "pytorch-ignite"
+version = "0.5.0.post2"
+description = "A lightweight library to help with training neural networks in PyTorch."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytorch-ignite-0.5.0.post2.tar.gz", hash = "sha256:052510ec92fa3e4b3a0ba2296b09b3465ad12eadf657ba58e0760dbde0f3200d"},
+    {file = "pytorch_ignite-0.5.0.post2-py3-none-any.whl", hash = "sha256:d1f60c6ed17fa0f03920f20297de6614c8ed5cb6ad6054160d22de248ccd761f"},
+]
+
+[package.dependencies]
+packaging = "*"
+torch = ">=1.3,<3"
 
 [[package]]
 name = "ruff"
@@ -919,4 +947,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "2c0f33b016a099ef18e8926d2699275c1ecb01bf92fcca416c17f037c2177b50"
+content-hash = "f9bf41d4d4c7d0a6b8a8ff9ddfd2a4ab53c9dc9b218c6b6c44828ce942985c58"
