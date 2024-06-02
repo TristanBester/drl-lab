@@ -1,4 +1,4 @@
-from os import statvfs_result
+from os import stat, statvfs_result
 
 from torch.types import Storage
 from drl_lab.lib.experience.transition import TransitionExperienceGenerator
@@ -13,6 +13,7 @@ from drl_lab.projects.network import DeepQNetwork
 from drl_lab.lib.experience.transition import EpisodeStatisticsAggregator
 from drl_lab.projects.utils import sync_networks
 from drl_lab.projects.loss import dqn_loss
+from ignite.handlers.tensorboard_logger import *
 
 from ignite.engine import Engine, Events
 
@@ -57,9 +58,12 @@ if __name__ == "__main__":
         if engine.state.iteration % 1000 == 0:
             sync_networks(value_net, target_net)
 
+        # Should be something like for stat in stats add to response
         return {
             "loss": loss.item(),
             "epsilon": agent.action_selector.epsilon,
+            "returns": stats_aggregator.returns,
+            "lengths": stats_aggregator.lengths,
         }
 
     def batch_generator():
@@ -78,13 +82,54 @@ if __name__ == "__main__":
 
     trainer = Engine(process_batch)
 
-    @trainer.on(Events.EPOCH_COMPLETED)
-    def on_epoch_completed(engine):
-        print(f"Epoch {engine.state.epoch} completed")
-        if stats_aggregator.export_required():
-            returns, lengths = stats_aggregator.export()
-            print(
-                f"Epoch {engine.state.epoch} complete. Mean return: {returns.mean()}. Mean length: {lengths.mean()}"
-            )
+    tb_logger = TensorboardLogger(log_dir="logs/run_1")
 
-    trainer.run(batch_generator(), max_epochs=10, epoch_length=10000)
+    tb_logger.attach_output_handler(
+        trainer,
+        event_name=Events.ITERATION_COMPLETED,
+        tag="training",
+        output_transform=lambda output: {
+            "loss": output["loss"],
+            "epsilon": output["epsilon"],
+            "returns": output["returns"],
+            "lengths": output["lengths"],
+        },
+    )
+    # Attach the logger to the trainer to log optimizer's parameters, e.g. learning rate at each iteration
+    tb_logger.attach_opt_params_handler(
+        trainer,
+        event_name=Events.ITERATION_STARTED,
+        optimizer=optimizer,
+        param_name="lr",  # optional
+    )
+
+    # Attach the logger to the trainer to log model's weights norm after each iteration
+    tb_logger.attach(
+        trainer,
+        event_name=Events.ITERATION_COMPLETED,
+        log_handler=WeightsScalarHandler(value_net),
+    )
+
+    # Attach the logger to the trainer to log model's weights as a histogram after each epoch
+    tb_logger.attach(
+        trainer,
+        event_name=Events.EPOCH_COMPLETED,
+        log_handler=WeightsHistHandler(value_net),
+    )
+
+    # Attach the logger to the trainer to log model's gradients norm after each iteration
+    tb_logger.attach(
+        trainer,
+        event_name=Events.ITERATION_COMPLETED,
+        log_handler=GradsScalarHandler(value_net),
+    )
+
+    # Attach the logger to the trainer to log model's gradients as a histogram after each epoch
+    tb_logger.attach(
+        trainer,
+        event_name=Events.EPOCH_COMPLETED,
+        log_handler=GradsHistHandler(value_net),
+    )
+
+    trainer.run(batch_generator(), max_epochs=100, epoch_length=10000)
+    tb_logger.close()

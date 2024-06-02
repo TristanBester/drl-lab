@@ -7,32 +7,27 @@ import numpy as np
 
 
 class EpisodeStatisticsAggregator:
-    def __init__(self, max_length: int = 10000, min_export_size: int = 100):
-        self.max_length = max_length
-        self.ep_counter = 0
-        self.min_export_size = min_export_size
-        self._clear_buffers()
+    def __init__(self, window_size: int = 2):
+        """Constructor."""
+        self.alpha = 2 / (window_size + 1)
 
-    def _clear_buffers(self):
-        self.elements_in_buffer = 0
-        self.returns_buffer = np.zeros(self.max_length)
-        self.lengths_buffer = np.zeros(self.max_length)
-        # FPS stuff
+        self.returns_ema = 0.0
+        self.lengths_ema = 0.0
 
     def record_episode(self, return_: float, length: int):
-        self.returns_buffer[self.elements_in_buffer % self.max_length] = return_
-        self.lengths_buffer[self.elements_in_buffer % self.max_length] = length
-        self.elements_in_buffer += 1
-        self.ep_counter += 1
+        """Record the episode."""
+        self.returns_ema = self.alpha * return_ + (1 - self.alpha) * self.returns_ema
+        self.lengths_ema = self.alpha * length + (1 - self.alpha) * self.lengths_ema
 
-    def export_required(self) -> bool:
-        return self.elements_in_buffer >= self.min_export_size
+    @property
+    def returns(self) -> float:
+        """Returns the average return."""
+        return self.returns_ema
 
-    def export(self):
-        returns = self.returns_buffer[: self.elements_in_buffer]
-        lengths = self.lengths_buffer[: self.elements_in_buffer]
-        self._clear_buffers()
-        return returns, lengths
+    @property
+    def lengths(self) -> float:
+        """Returns the average length."""
+        return self.lengths_ema
 
 
 class TransitionExperienceGenerator(ExperienceGenerator):
