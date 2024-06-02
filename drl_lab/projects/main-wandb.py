@@ -14,6 +14,7 @@ from drl_lab.lib.experience.transition import EpisodeStatisticsAggregator
 from drl_lab.projects.utils import sync_networks
 from drl_lab.projects.loss import dqn_loss
 from ignite.handlers.tensorboard_logger import *
+from ignite.contrib.handlers.wandb_logger import *
 
 from ignite.engine import Engine, Events
 
@@ -82,9 +83,15 @@ if __name__ == "__main__":
 
     trainer = Engine(process_batch)
 
-    tb_logger = TensorboardLogger(log_dir="logs/run_1")
+    # WandBlogger Object Creation
+    wandb_logger = WandBLogger(
+        project="pytorch-ignite-integration",
+        name="cnn-mnist",
+        config={"max_epochs": 100, "batch_size": 32},
+        tags=["pytorch-ignite", "mninst"],
+    )
 
-    tb_logger.attach_output_handler(
+    wandb_logger.attach_output_handler(
         trainer,
         event_name=Events.ITERATION_COMPLETED,
         tag="training",
@@ -95,41 +102,14 @@ if __name__ == "__main__":
             "lengths": output["lengths"],
         },
     )
-    # Attach the logger to the trainer to log optimizer's parameters, e.g. learning rate at each iteration
-    tb_logger.attach_opt_params_handler(
+
+    wandb_logger.attach_opt_params_handler(
         trainer,
         event_name=Events.ITERATION_STARTED,
         optimizer=optimizer,
         param_name="lr",  # optional
     )
 
-    # Attach the logger to the trainer to log model's weights norm after each iteration
-    tb_logger.attach(
-        trainer,
-        event_name=Events.ITERATION_COMPLETED,
-        log_handler=WeightsScalarHandler(value_net),
-    )
-
-    # Attach the logger to the trainer to log model's weights as a histogram after each epoch
-    tb_logger.attach(
-        trainer,
-        event_name=Events.EPOCH_COMPLETED,
-        log_handler=WeightsHistHandler(value_net),
-    )
-
-    # Attach the logger to the trainer to log model's gradients norm after each iteration
-    tb_logger.attach(
-        trainer,
-        event_name=Events.ITERATION_COMPLETED,
-        log_handler=GradsScalarHandler(value_net),
-    )
-
-    # Attach the logger to the trainer to log model's gradients as a histogram after each epoch
-    tb_logger.attach(
-        trainer,
-        event_name=Events.EPOCH_COMPLETED,
-        log_handler=GradsHistHandler(value_net),
-    )
+    wandb_logger.watch(value_net)
 
     trainer.run(batch_generator(), max_epochs=100, epoch_length=10000)
-    tb_logger.close()

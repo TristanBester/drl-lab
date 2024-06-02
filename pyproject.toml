@@ -17,6 +17,7 @@ cpprb = "^10.7.2"
 pytorch-ignite = "^0.5.0.post2"
 tensorboardx = "^2.6.2.2"
 tensorboard = "^2.16.2"
+wandb = "^0.17.0"
 
 
 [tool.poetry.group.dev.dependencies]
