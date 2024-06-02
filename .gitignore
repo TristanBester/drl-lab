@@ -5,4 +5,5 @@
 # Directories
 .venv/
 __pycache__/
+logs/
 
