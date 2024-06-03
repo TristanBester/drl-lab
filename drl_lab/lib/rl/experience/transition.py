@@ -1,9 +1,8 @@
-from drl_lab.lib.experience.types import Experience
+from drl_lab.lib.rl.experience.types import Experience
 import torch
-from drl_lab.lib.experience.interface import ExperienceGenerator
-from drl_lab.lib.agents.interface import Agent
+from drl_lab.lib.rl.experience.interface import ExperienceGenerator
+from drl_lab.lib.rl.agents.interface import Agent
 import gymnasium as gym
-import numpy as np
 
 
 class EpisodeStatisticsAggregator:

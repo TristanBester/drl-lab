@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from drl_lab.lib.experience.types import Experience
+from drl_lab.lib.rl.experience.types import Experience
 
 
 class ExperienceGenerator(ABC):

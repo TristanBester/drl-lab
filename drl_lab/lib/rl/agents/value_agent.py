@@ -1,5 +1,5 @@
-from drl_lab.lib.agents.interface import Agent
-from drl_lab.lib.actions import ActionSelector
+from drl_lab.lib.rl.agents.interface import Agent
+from drl_lab.lib.rl.actions import ActionSelector
 import torch
 import torch.nn as nn
 

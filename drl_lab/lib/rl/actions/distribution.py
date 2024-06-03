@@ -1,4 +1,4 @@
-from drl_lab.lib.actions.interface import ActionSelector
+from drl_lab.lib.rl.actions.interface import ActionSelector
 import torch
 
 

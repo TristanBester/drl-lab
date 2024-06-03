@@ -54,7 +54,7 @@ if __name__ == "__main__":
         value_net=value_net,
     )
 
-    stats_aggregator = EpisodeStatisticsAggregator()
+    stats_aggregato = EpisodeStatisticsAggregator()
     exp_gen = TransitionExperienceGenerator(env, agent, stats_aggregator)
     buffer = ReplayBuffer(
         size=100000,
