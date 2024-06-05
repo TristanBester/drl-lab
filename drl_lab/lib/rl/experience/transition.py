@@ -35,16 +35,10 @@ class TransitionExperienceGenerator(ExperienceGenerator):
         self,
         env: gym.Env,
         agent: Agent,
-        stat_aggregator: EpisodeStatisticsAggregator,
     ):
         """Constructor."""
         self.agent = agent
         self.env = env
-
-        self.stat_aggregator = stat_aggregator
-
-        self.ep_steps = 0
-        self.ep_returns = 0.0
 
         self.obs, _ = env.reset()
 
@@ -58,9 +52,6 @@ class TransitionExperienceGenerator(ExperienceGenerator):
         action = self.agent(obs)
         obs_next, reward, terminated, truncated, info = self.env.step(action)
 
-        self.ep_returns += float(reward)
-        self.ep_steps += 1
-
         experience = Experience(
             self.obs,
             action,
@@ -73,9 +64,6 @@ class TransitionExperienceGenerator(ExperienceGenerator):
 
         if terminated or truncated:
             self.obs, _ = self.env.reset()
-            self.stat_aggregator.record_episode(self.ep_returns, self.ep_steps)
-            self.ep_returns = 0
-            self.ep_steps = 0
         else:
             self.obs = obs_next
         return experience
