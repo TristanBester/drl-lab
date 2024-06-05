@@ -1,14 +1,14 @@
 from dataclasses import dataclass, field
 
-import torch
+from numpy.typing import ArrayLike
 
 
 @dataclass
 class Experience:
-    obs: torch.Tensor
-    action: torch.Tensor
-    obs_next: torch.Tensor
-    reward: torch.Tensor
+    obs: ArrayLike
+    action: ArrayLike
+    obs_next: ArrayLike
+    reward: float
     terminated: bool
     truncated: bool
     info: dict = field(default_factory=dict)

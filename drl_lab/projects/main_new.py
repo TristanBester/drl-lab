@@ -1,11 +1,16 @@
 import copy
+from typing import Callable
 
 import gymnasium as gym
 import torch
 import torch.optim as optim
 from cpprb import ReplayBuffer
 from ignite.engine import Engine, Events
+from ignite.handlers import (TensorboardLogger, WandBLogger,
+                             global_step_from_engine)
+from ignite.handlers.base_logger import BaseHandler
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from wandb.sdk import wandb_watch
 
 from drl_lab.lib.rl.actions import EpsilonGreedyActionSelector
 from drl_lab.lib.rl.agents.value_agent import ValueAgent
@@ -75,12 +80,12 @@ if __name__ == "__main__":
     optimizer = optim.Adam(value_net.parameters(), lr=0.001)
     scheduler = CosineAnnealingLR(optimizer, T_max=100000, eta_min=0.00001)
 
-    # Reinforcement Learning
     agent = ValueAgent(
         action_selector=EpsilonGreedyActionSelector(0.1),
         device=device,
         value_net=value_net,
     )
+
     engine = Engine(process_batch)
 
     exp_gen = RecordEpisodeStatistics(
@@ -88,15 +93,20 @@ if __name__ == "__main__":
         engine,
     )
 
-    # Handlers
-    @engine.on(Events.ITERATION_COMPLETED(every=1000))
-    def log_metrics():
-        print(
-            f"Iteration: {engine.state.iteration}\tLength: {engine.state.ep_lengths}\tReward: {engine.state.ep_returns}"
-        )
+    # tb_logger = TensorboardLogger(log_dir="logs/run_1")
 
-    engine.run(
-        batch_generator(),
-        max_epochs=100,
-        epoch_length=10000,
+    # tb_logger.attach(
+    #    engine,
+    #    log_handler=ScalarHandler(scalar_name="ep_returns"),
+    #    event_name=Events.ITERATION_COMPLETED(every=1000),
+    # )
+
+    wandb_logger = WandBLogger(project="drl_lab")
+
+    wandb_logger.attach(
+        engine,
+        log_handler=ScalarHandler(scalar_name="ep_returns"),
+        event_name=Events.ITERATION_COMPLETED(every=1000),
     )
+
+    engine.run(batch_generator())

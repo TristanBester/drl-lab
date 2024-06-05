@@ -11,7 +11,7 @@ from ignite.handlers.tensorboard_logger import (GradsHistHandler,
 from torch.optim import Optimizer
 
 
-def attach_tensorboard_logger(
+def register_tb_handlers(
     engine: Engine,
     output_transform: Callable,
     log_dir: str = "logs/",

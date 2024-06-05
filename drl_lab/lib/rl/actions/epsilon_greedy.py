@@ -1,6 +1,7 @@
-from drl_lab.lib.rl.actions.interface import ActionSelector
-import torch
 import numpy as np
+import torch
+
+from drl_lab.lib.rl.interfaces import ActionSelector
 
 
 class EpsilonGreedyActionSelector(ActionSelector):

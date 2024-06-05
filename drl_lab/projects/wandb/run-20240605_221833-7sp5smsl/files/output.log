@@ -1,0 +1,124 @@
+iteration: 1000	13.411886168337148
+1000
+iteration: 2000	11.069359490384038
+2000
+iteration: 3000	27.84169021839795
+3000
+iteration: 4000	49.09850961389155
+4000
+iteration: 5000	81.49210876978509
+5000
+iteration: 6000	104.01024142923134
+6000
+iteration: 7000	119.03300214385294
+7000
+iteration: 8000	148.37885669233137
+8000
+iteration: 9000	165.83896787583862
+9000
+iteration: 10000	191.323102141004
+10000
+iteration: 11000	199.91428731471274
+11000
+iteration: 12000	227.44446390718306
+12000
+iteration: 13000	213.99734149255255
+13000
+iteration: 14000	207.8862501779374
+14000
+iteration: 15000	225.82006874174476
+15000
+iteration: 16000	237.65444710145874
+16000
+iteration: 17000	228.13168274326713
+17000
+iteration: 18000	202.35722660876465
+18000
+iteration: 19000	190.5837378661885
+19000
+iteration: 20000	163.4666370118106
+20000
+iteration: 21000	155.21006023617431
+21000
+iteration: 22000	161.47594462197273
+22000
+iteration: 23000	172.13043053982867
+23000
+iteration: 24000	198.5317754771816
+24000
+iteration: 25000	205.074158101521
+25000
+iteration: 26000	179.80533765563044
+26000
+iteration: 27000	219.2270911509546
+27000
+iteration: 28000	195.1748365483545
+28000
+iteration: 29000	198.78285923343788
+29000
+iteration: 30000	191.5211454938775
+30000
+iteration: 31000	175.09665208241177
+31000
+iteration: 32000	168.54304287932902
+32000
+iteration: 33000	147.03303680317518
+33000
+iteration: 34000	136.30543940049017
+34000
+iteration: 35000	166.32605891159545
+35000
+iteration: 36000	171.416724526708
+36000
+iteration: 37000	177.29999166577582
+37000
+iteration: 38000	217.63642453191554
+38000
+iteration: 39000	205.3456823218508
+39000
+iteration: 40000	192.68942195422966
+40000
+iteration: 41000	202.7963867697531
+41000
+iteration: 42000	222.51840935963503
+42000
+iteration: 43000	192.86946798849382
+43000
+iteration: 44000	181.84314215252573
+44000
+iteration: 45000	188.90233830868044
+45000
+iteration: 46000	166.61677501579314
+46000
+iteration: 47000	142.07883706024617
+47000
+Engine run is terminating due to exception:
+Traceback (most recent call last):
+  File "/Users/tristan/Projects/drl-lab/drl_lab/projects/main_new.py", line 163, in <module>
+    engine.run(batch_generator())
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/ignite/engine/engine.py", line 889, in run
+    return self._internal_run()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/ignite/engine/engine.py", line 932, in _internal_run
+    return next(self._internal_run_generator)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/ignite/engine/engine.py", line 990, in _internal_run_as_gen
+    self._handle_exception(e)
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/ignite/engine/engine.py", line 644, in _handle_exception
+    raise e
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/ignite/engine/engine.py", line 956, in _internal_run_as_gen
+    epoch_time_taken += yield from self._run_once_on_dataset_as_gen()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/ignite/engine/engine.py", line 1077, in _run_once_on_dataset_as_gen
+    self.state.output = self._process_function(self, self.state.batch)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/tristan/Projects/drl-lab/drl_lab/projects/main_new.py", line 48, in process_batch
+    loss.backward()
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/torch/_tensor.py", line 525, in backward
+    torch.autograd.backward(
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/torch/autograd/__init__.py", line 267, in backward
+    _engine_run_backward(
+  File "/Users/tristan/Projects/drl-lab/.venv/lib/python3.11/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

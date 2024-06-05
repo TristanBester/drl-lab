@@ -1,33 +1,8 @@
 import gymnasium as gym
 import torch
 
-from drl_lab.lib.rl.agents.interface import Agent
-from drl_lab.lib.rl.experience.interface import ExperienceGenerator
-from drl_lab.lib.rl.experience.types import Experience
-
-
-class EpisodeStatisticsAggregator:
-    def __init__(self, window_size: int = 2):
-        """Constructor."""
-        self.alpha = 2 / (window_size + 1)
-
-        self.returns_ema = 0.0
-        self.lengths_ema = 0.0
-
-    def record_episode(self, return_: float, length: int):
-        """Record the episode."""
-        self.returns_ema = self.alpha * return_ + (1 - self.alpha) * self.returns_ema
-        self.lengths_ema = self.alpha * length + (1 - self.alpha) * self.lengths_ema
-
-    @property
-    def returns(self) -> float:
-        """Returns the average return."""
-        return self.returns_ema
-
-    @property
-    def lengths(self) -> float:
-        """Returns the average length."""
-        return self.lengths_ema
+from drl_lab.lib.rl.interfaces import Agent, ExperienceGenerator
+from drl_lab.lib.rl.types import Experience
 
 
 class TransitionExperienceGenerator(ExperienceGenerator):
@@ -56,7 +31,7 @@ class TransitionExperienceGenerator(ExperienceGenerator):
             self.obs,
             action,
             obs_next,
-            reward,
+            float(reward),
             terminated,
             truncated,
             info,

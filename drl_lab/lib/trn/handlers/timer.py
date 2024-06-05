@@ -1,5 +1,5 @@
-from ignite.engine import Engine
-from ignite.handlers import TensorboardLogger, global_step_from_engine, Timer
+from ignite.engine import Engine, Events
+from ignite.handlers import TensorboardLogger, Timer, global_step_from_engine
 
 
 class TimingHandler:
@@ -8,7 +8,9 @@ class TimingHandler:
         self.last_time = 0
         self.call_freq = call_freq
 
-    def __call__(self, engine: Engine, logger: TensorboardLogger, event_name) -> None:
+    def __call__(
+        self, engine: Engine, logger: TensorboardLogger, event_name: str | Events
+    ) -> None:
         if not isinstance(logger, TensorboardLogger):
             raise RuntimeError(
                 "Handler 'OutputHandler' works only with TensorboardLogger"
