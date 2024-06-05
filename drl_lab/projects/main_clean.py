@@ -1,21 +1,21 @@
-import gymnasium as gym
-from cpprb import ReplayBuffer
-import torch.optim as optim
-from torch.optim.lr_scheduler import StepLR
-from drl_lab.projects.network import DeepQNetwork
-from drl_lab.projects.utils import sync_networks, add_max_to_engine_state
-from drl_lab.lib.rl.agents.value_agent import ValueAgent
-from drl_lab.projects.loss import dqn_loss
-from drl_lab.lib.rl.actions import EpsilonGreedyActionSelector
-from drl_lab.lib.rl.experience.transition import (
-    EpisodeStatisticsAggregator,
-    TransitionExperienceGenerator,
-)
-import torch
 import copy
 from typing import Callable
+
+import gymnasium as gym
+import torch
+import torch.optim as optim
+from cpprb import ReplayBuffer
 from ignite.engine import Engine
+from torch.optim.lr_scheduler import CosineAnnealingLR
+
+from drl_lab.lib.rl.actions import EpsilonGreedyActionSelector
+from drl_lab.lib.rl.agents.value_agent import ValueAgent
+from drl_lab.lib.rl.experience.transition import (
+    EpisodeStatisticsAggregator, TransitionExperienceGenerator)
 from drl_lab.lib.trn.handlers.tensorboard import attach_tensorboard_logger
+from drl_lab.projects.loss import dqn_loss
+from drl_lab.projects.network import DeepQNetwork
+from drl_lab.projects.utils import add_max_to_engine_state, sync_networks
 
 
 def create_batch_processor() -> Callable:
@@ -31,6 +31,8 @@ def create_batch_processor() -> Callable:
         )
         loss.backward()
         optimizer.step()
+        # We should probably step on epoch level
+        # We can the also step on val loss
         scheduler.step()
 
         add_max_to_engine_state(engine, "max_return", stats_aggregator.returns)
@@ -58,8 +60,8 @@ def create_batch_generator() -> Callable:
                 action=exp.action,
                 obs_next=exp.obs_next,
                 reward=exp.reward,
+                terminated=exp.terminated,
                 truncated=exp.truncated,
-                done=exp.done,
             )
 
             if buffer.get_stored_size() > 1000:
@@ -84,12 +86,12 @@ if __name__ == "__main__":
             "action": {"shape": 1},
             "obs_next": {"shape": obs_dim},
             "reward": {},
+            "terminated": {},
             "truncated": {},
-            "done": {},
         },
     )
-    optimizer = optim.Adam(value_net.parameters(), lr=0.0001)
-    scheduler = StepLR(optimizer, step_size=1000, gamma=0.9)
+    optimizer = optim.Adam(value_net.parameters(), lr=0.001)
+    scheduler = CosineAnnealingLR(optimizer, T_max=100000, eta_min=0.00001)
 
     # Training infrastructure
     agent = ValueAgent(

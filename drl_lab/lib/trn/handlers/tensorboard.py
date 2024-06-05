@@ -1,15 +1,14 @@
-from ignite.engine import Engine, Events
-from ignite.handlers.tensorboard_logger import (
-    TensorboardLogger,
-    WeightsScalarHandler,
-    WeightsHistHandler,
-    GradsScalarHandler,
-    GradsHistHandler,
-)
-from typing import Callable
-from torch.optim import Optimizer
-import torch.nn as nn
 import os
+from typing import Callable
+
+import torch.nn as nn
+from ignite.engine import Engine, Events
+from ignite.handlers.tensorboard_logger import (GradsHistHandler,
+                                                GradsScalarHandler,
+                                                TensorboardLogger,
+                                                WeightsHistHandler,
+                                                WeightsScalarHandler)
+from torch.optim import Optimizer
 
 
 def attach_tensorboard_logger(
@@ -25,7 +24,6 @@ def attach_tensorboard_logger(
     optimizer: Optimizer | None = None,
 ) -> None:
     """Configure and attach TensorBoard logger to the engine."""
-
     run_name = _get_next_run_name(log_dir)
     log_dir = os.path.join(log_dir, run_name)
     tb_logger = TensorboardLogger(log_dir=log_dir)

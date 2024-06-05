@@ -1,8 +1,9 @@
-from drl_lab.lib.rl.experience.types import Experience
-import torch
-from drl_lab.lib.rl.experience.interface import ExperienceGenerator
-from drl_lab.lib.rl.agents.interface import Agent
 import gymnasium as gym
+import torch
+
+from drl_lab.lib.rl.agents.interface import Agent
+from drl_lab.lib.rl.experience.interface import ExperienceGenerator
+from drl_lab.lib.rl.experience.types import Experience
 
 
 class EpisodeStatisticsAggregator:
@@ -56,16 +57,21 @@ class TransitionExperienceGenerator(ExperienceGenerator):
         obs = torch.Tensor(self.obs)
         action = self.agent(obs)
         obs_next, reward, terminated, truncated, info = self.env.step(action)
-        done = truncated or terminated
 
         self.ep_returns += float(reward)
         self.ep_steps += 1
 
         experience = Experience(
-            self.obs, action, obs_next, reward, truncated, done, info
+            self.obs,
+            action,
+            obs_next,
+            reward,
+            terminated,
+            truncated,
+            info,
         )
 
-        if done:
+        if terminated or truncated:
             self.obs, _ = self.env.reset()
             self.stat_aggregator.record_episode(self.ep_returns, self.ep_steps)
             self.ep_returns = 0

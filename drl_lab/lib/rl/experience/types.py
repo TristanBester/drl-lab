@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+
 import torch
 
 
@@ -8,6 +9,6 @@ class Experience:
     action: torch.Tensor
     obs_next: torch.Tensor
     reward: torch.Tensor
+    terminated: bool
     truncated: bool
-    done: bool
     info: dict = field(default_factory=dict)

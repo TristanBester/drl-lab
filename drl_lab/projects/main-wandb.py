@@ -1,23 +1,22 @@
+import copy
 from os import stat, statvfs_result
 
-from torch.types import Storage
-from drl_lab.lib.experience.transition import TransitionExperienceGenerator
-from drl_lab.lib.agents.value_agent import ValueAgent
-from drl_lab.lib.actions import EpsilonGreedyActionSelector
 import gymnasium as gym
 import torch
-from cpprb import ReplayBuffer, train
-import copy
 import torch.optim as optim
-from drl_lab.projects.network import DeepQNetwork
-from drl_lab.lib.experience.transition import EpisodeStatisticsAggregator
-from drl_lab.projects.utils import sync_networks
-from drl_lab.projects.loss import dqn_loss
-from ignite.handlers.tensorboard_logger import *
+from cpprb import ReplayBuffer, train
+from drl_lab.lib.actions import EpsilonGreedyActionSelector
+from drl_lab.lib.agents.value_agent import ValueAgent
+from drl_lab.lib.experience.transition import (EpisodeStatisticsAggregator,
+                                               TransitionExperienceGenerator)
 from ignite.contrib.handlers.wandb_logger import *
-
 from ignite.engine import Engine, Events
+from ignite.handlers.tensorboard_logger import *
+from torch.types import Storage
 
+from drl_lab.projects.loss import dqn_loss
+from drl_lab.projects.network import DeepQNetwork
+from drl_lab.projects.utils import sync_networks
 
 if __name__ == "__main__":
     env = gym.make("CartPole-v1")
