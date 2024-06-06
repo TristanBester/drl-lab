@@ -5,12 +5,21 @@ import torch
 import torch.optim as optim
 from cpprb import ReplayBuffer
 from ignite.engine import Engine, Events
+from ignite.handlers import Checkpoint
+from ignite.handlers.tensorboard_logger import (GradsHistHandler,
+                                                GradsScalarHandler,
+                                                TensorboardLogger,
+                                                WeightsHistHandler,
+                                                WeightsScalarHandler)
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from drl_lab.lib.rl.actions import EpsilonGreedyActionSelector
 from drl_lab.lib.rl.agents.value_agent import ValueAgent
 from drl_lab.lib.rl.experience.transition import TransitionExperienceGenerator
-from drl_lab.lib.trn.wrappers.ep_stats import RecordEpisodeStatistics
+from drl_lab.lib.trn.handlers import tensorboard as tbh
+from drl_lab.lib.trn.handlers.utils import global_step_transform
+from drl_lab.lib.trn.wrappers import (InteractionTimingHandler,
+                                      RecordEpisodeStatistics)
 from drl_lab.projects.loss import dqn_loss
 from drl_lab.projects.network import DeepQNetwork
 from drl_lab.projects.utils import sync_networks
@@ -47,9 +56,7 @@ def process_batch(engine: Engine, batch: dict):
     if engine.state.iteration % 1000 == 0:
         sync_networks(value_net, target_net)
 
-    return {
-        "loss": loss.item(),
-    }
+    engine.state.metrics["loss"] = loss.item()
 
 
 if __name__ == "__main__":
@@ -76,24 +83,89 @@ if __name__ == "__main__":
     scheduler = CosineAnnealingLR(optimizer, T_max=100000, eta_min=0.00001)
 
     # Reinforcement Learning
+    engine = Engine(process_batch)
     agent = ValueAgent(
         action_selector=EpsilonGreedyActionSelector(0.1),
         device=device,
         value_net=value_net,
     )
-    engine = Engine(process_batch)
+    transition_generator = TransitionExperienceGenerator(env, agent)
+    exp_gen = RecordEpisodeStatistics(transition_generator, engine)
+    exp_gen = InteractionTimingHandler(exp_gen, engine)
 
-    exp_gen = RecordEpisodeStatistics(
-        TransitionExperienceGenerator(env, agent),
+    # Call attach logging handlers()
+    # Then pass hyra config to the logging config attach
+    # This will specify how all the loggers should be configured
+
+    # Logging
+    tb_logger = TensorboardLogger(log_dir="logs")
+
+    tb_logger.attach(
         engine,
+        log_handler=tbh.ScalarHandler(
+            "ep_returns", global_step_transform, "1-training"
+        ),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler(
+            "ep_lengths", global_step_transform, "1-training"
+        ),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler(
+            "interaction_time", global_step_transform, "1-training"
+        ),
+        event_name=Events.ITERATION_COMPLETED(every=100),
     )
 
-    # Handlers
-    @engine.on(Events.ITERATION_COMPLETED(every=1000))
-    def log_metrics():
-        print(
-            f"Iteration: {engine.state.iteration}\tLength: {engine.state.ep_lengths}\tReward: {engine.state.ep_returns}"
-        )
+    tb_logger.attach_output_handler(
+        engine,
+        event_name=Events.ITERATION_COMPLETED(every=100),
+        tag="1-training",
+        metric_names=["loss"],
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=GradsScalarHandler(value_net, tag="2-gradients"),
+        event_name=Events.ITERATION_COMPLETED(every=10000),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=GradsHistHandler(value_net, tag="2-gradients"),
+        event_name=Events.ITERATION_COMPLETED(every=10000),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=WeightsScalarHandler(value_net, tag="3-weights"),
+        event_name=Events.ITERATION_COMPLETED(every=10000),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=WeightsHistHandler(value_net, tag="3-weights"),
+        event_name=Events.ITERATION_COMPLETED(every=10000),
+    )
+    tb_logger.attach_opt_params_handler(
+        engine,
+        event_name=Events.ITERATION_COMPLETED(every=10000),
+        optimizer=optimizer,
+        param_name="lr",
+        tag="1-training",
+    )
+
+    # Checkpointing
+    # engine.add_event_handler(
+    #    event_name=Events.ITERATION_COMPLETED(every=10000),
+    #    handler=Checkpoint(
+    #        to_save={"model": value_net, "optimizer": optimizer},
+    #        save_handler="checkpoints/",
+    #        n_saved=3,
+    #        global_step_transform=global_step_transform,
+    #    ),
+    # )
 
     engine.run(
         batch_generator(),
