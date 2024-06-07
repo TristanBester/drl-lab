@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Self
 
-from drl_lab.lib.rl.types import Experience
+from drl_lab.lib.core.types import Experience
 
 
 class ExperienceGenerator(ABC):

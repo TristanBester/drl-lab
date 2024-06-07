@@ -9,11 +9,11 @@ from cpprb import ReplayBuffer
 from ignite.engine import Engine
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
-from drl_lab.lib.rl.actions import EpsilonGreedyActionSelector
-from drl_lab.lib.rl.agents.value_agent import ValueAgent
-from drl_lab.lib.rl.experience.transition import (
+from drl_lab.lib.core.actions import EpsilonGreedyActionSelector
+from drl_lab.lib.core.agents.value_agent import ValueAgent
+from drl_lab.lib.core.experience.transition import (
     EpisodeStatisticsAggregator, TransitionExperienceGenerator)
-from drl_lab.lib.trn.handlers.tensorboard import attach_tensorboard_logger
+from drl_lab.lib.ignite.handlers.tensorboard import attach_tensorboard_logger
 from drl_lab.projects.loss import dqn_loss
 from drl_lab.projects.network import DeepQNetwork
 from drl_lab.projects.utils import add_max_to_engine_state, sync_networks

@@ -1,8 +1,8 @@
 import gymnasium as gym
 import torch
 
-from drl_lab.lib.rl.interfaces import Agent, ExperienceGenerator
-from drl_lab.lib.rl.types import Experience
+from drl_lab.lib.core.interfaces import Agent, ExperienceGenerator
+from drl_lab.lib.core.types import Experience
 
 
 class TransitionExperienceGenerator(ExperienceGenerator):

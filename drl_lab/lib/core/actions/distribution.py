@@ -1,6 +1,6 @@
 import torch
 
-from drl_lab.lib.rl.interfaces import ActionSelector
+from drl_lab.lib.core.interfaces import ActionSelector
 
 
 class DistributionActionSelector(ActionSelector):

@@ -1,5 +1,5 @@
 import copy
-from time import time
+import time
 
 import gymnasium as gym
 import torch
@@ -13,19 +13,20 @@ from ignite.handlers.tensorboard_logger import (GradsHistHandler,
                                                 WeightsHistHandler,
                                                 WeightsScalarHandler)
 
-from drl_lab.lib.rl.actions import (ArgmaxActionSelector,
-                                    EpsilonGreedyActionSelector)
-from drl_lab.lib.rl.agents.value_agent import ValueAgent
-from drl_lab.lib.rl.experience.transition import TransitionExperienceGenerator
-from drl_lab.lib.trn.handlers import tensorboard as tbh
-from drl_lab.lib.trn.handlers.agent import (EpsilonDecayHandler,
-                                            EpsilonRecorderHandler)
-from drl_lab.lib.trn.handlers.eval import EvalHandler
-from drl_lab.lib.trn.handlers.timer import (TimingHandler,
-                                            TrainingTimeFractionHandler)
-from drl_lab.lib.trn.handlers.utils import global_step_transform
-from drl_lab.lib.trn.wrappers import (InteractionTimingHandler,
-                                      RecordEpisodeStatistics)
+from drl_lab.lib.core.actions import (ArgmaxActionSelector,
+                                      EpsilonGreedyActionSelector)
+from drl_lab.lib.core.agents.value_agent import ValueAgent
+from drl_lab.lib.core.experience.transition import \
+    TransitionExperienceGenerator
+from drl_lab.lib.ignite.handlers import tensorboard as tbh
+from drl_lab.lib.ignite.handlers.agent import (EpsilonDecayHandler,
+                                               EpsilonRecorderHandler)
+from drl_lab.lib.ignite.handlers.eval import EvalHandler
+from drl_lab.lib.ignite.handlers.timer import (TimingHandler,
+                                               TrainingTimeFractionHandler)
+from drl_lab.lib.ignite.handlers.utils import global_step_transform
+from drl_lab.lib.ignite.wrappers import (InteractionTimingHandler,
+                                         RecordEpisodeStatistics)
 from drl_lab.projects.loss import dqn_loss
 from drl_lab.projects.network import DeepQNetwork
 from drl_lab.projects.utils import sync_networks

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from drl_lab.lib.rl.interfaces import ActionSelector, Agent
+from drl_lab.lib.core.interfaces import ActionSelector, Agent
 
 
 class ValueAgent(Agent):

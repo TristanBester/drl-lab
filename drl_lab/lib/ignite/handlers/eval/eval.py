@@ -4,7 +4,7 @@ import gymnasium as gym
 import torch
 from ignite.engine import Engine
 
-from drl_lab.lib.rl.interfaces import Agent
+from drl_lab.lib.core.interfaces import Agent
 
 
 class EvalHandler:

@@ -7,7 +7,7 @@ from ignite.engine import Engine, Events
 from ignite.handlers import TensorboardLogger
 from ignite.handlers.base_logger import BaseHandler
 
-from drl_lab.lib.rl.interfaces import Agent
+from drl_lab.lib.core.interfaces import Agent
 
 
 class RecordEpisodeHandler(BaseHandler):
