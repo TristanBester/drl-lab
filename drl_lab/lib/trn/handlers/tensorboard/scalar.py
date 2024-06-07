@@ -21,6 +21,7 @@ class ScalarHandler(BaseHandler):
     ):
         if not hasattr(engine.state, self.scalar_name):
             # TODO: put warning here...
+            print(f"Warning: {self.scalar_name} not found in engine state.")
             return
 
         name = (

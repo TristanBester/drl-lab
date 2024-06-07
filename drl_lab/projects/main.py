@@ -1,11 +1,12 @@
 import copy
+from time import time
 
 import gymnasium as gym
 import torch
 import torch.optim as optim
 from cpprb import ReplayBuffer
 from ignite.engine import Engine, Events
-from ignite.handlers import Checkpoint
+from ignite.handlers import Checkpoint, Timer
 from ignite.handlers.tensorboard_logger import (GradsHistHandler,
                                                 GradsScalarHandler,
                                                 TensorboardLogger,
@@ -20,6 +21,8 @@ from drl_lab.lib.trn.handlers import tensorboard as tbh
 from drl_lab.lib.trn.handlers.agent import (EpsilonDecayHandler,
                                             EpsilonRecorderHandler)
 from drl_lab.lib.trn.handlers.eval import EvalHandler
+from drl_lab.lib.trn.handlers.timer import (TimingHandler,
+                                            TrainingTimeFractionHandler)
 from drl_lab.lib.trn.handlers.utils import global_step_transform
 from drl_lab.lib.trn.wrappers import (InteractionTimingHandler,
                                       RecordEpisodeStatistics)
@@ -127,9 +130,40 @@ if __name__ == "__main__":
         handler=EpsilonDecayHandler(agent),
     )
 
+    timer = Timer()
+    timer.attach(
+        engine,
+        start=Events.STARTED,
+        resume=Events.ITERATION_STARTED,
+        pause=Events.ITERATION_COMPLETED,
+        step=Events.ITERATION_COMPLETED,
+    )
+    engine.add_event_handler(
+        event_name=Events.ITERATION_COMPLETED,
+        handler=TimingHandler(timer),
+    )
+    engine.add_event_handler(
+        event_name=Events.ITERATION_COMPLETED,
+        handler=TrainingTimeFractionHandler(alpha=0.1),
+    )
+
     # Logging
     tb_logger = TensorboardLogger(log_dir="logs")
 
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler(
+            "training_iterations_per_second", global_step_transform, "1-training"
+        ),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler(
+            "training_time_fraction", global_step_transform, "1-training"
+        ),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
     tb_logger.attach(
         engine,
         log_handler=tbh.ScalarHandler(
