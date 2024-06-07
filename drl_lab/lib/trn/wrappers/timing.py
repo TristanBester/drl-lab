@@ -10,7 +10,7 @@ class InteractionTimingHandler:
         self.engine = engine
         self.alpha = alpha
 
-        self.engine.state.interaction_time = 0
+        self.engine.state.interactions_per_second = 0
 
     def __iter__(self):
         return self
@@ -22,8 +22,8 @@ class InteractionTimingHandler:
         time_delta = end_time - start_time
         steps_per_sec = 1.0 / time_delta
 
-        self.engine.state.interaction_time = (
+        self.engine.state.interactions_per_second = (
             self.alpha * steps_per_sec
-            + (1 - self.alpha) * self.engine.state.interaction_time
+            + (1 - self.alpha) * self.engine.state.interactions_per_second
         )
         return exp

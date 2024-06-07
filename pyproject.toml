@@ -18,6 +18,7 @@ pytorch-ignite = "^0.5.0.post2"
 tensorboardx = "^2.6.2.2"
 tensorboard = "^2.16.2"
 wandb = "^0.17.0"
+moviepy = "^1.0.3"
 
 
 [tool.poetry.group.dev.dependencies]

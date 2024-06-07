@@ -19,6 +19,10 @@ class ScalarHandler(BaseHandler):
     def __call__(
         self, engine: Engine, logger: TensorboardLogger, event_name: str | Events
     ):
+        if not hasattr(engine.state, self.scalar_name):
+            # TODO: put warning here...
+            return
+
         name = (
             f"{self.section_name}/{self.scalar_name}"
             if self.section_name is not None

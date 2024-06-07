@@ -11,12 +11,15 @@ from ignite.handlers.tensorboard_logger import (GradsHistHandler,
                                                 TensorboardLogger,
                                                 WeightsHistHandler,
                                                 WeightsScalarHandler)
-from torch.optim.lr_scheduler import CosineAnnealingLR
 
-from drl_lab.lib.rl.actions import EpsilonGreedyActionSelector
+from drl_lab.lib.rl.actions import (ArgmaxActionSelector,
+                                    EpsilonGreedyActionSelector)
 from drl_lab.lib.rl.agents.value_agent import ValueAgent
 from drl_lab.lib.rl.experience.transition import TransitionExperienceGenerator
 from drl_lab.lib.trn.handlers import tensorboard as tbh
+from drl_lab.lib.trn.handlers.agent import (EpsilonDecayHandler,
+                                            EpsilonRecorderHandler)
+from drl_lab.lib.trn.handlers.eval import EvalHandler
 from drl_lab.lib.trn.handlers.utils import global_step_transform
 from drl_lab.lib.trn.wrappers import (InteractionTimingHandler,
                                       RecordEpisodeStatistics)
@@ -51,7 +54,6 @@ def process_batch(engine: Engine, batch: dict):
     )
     loss.backward()
     optimizer.step()
-    scheduler.step()
 
     if engine.state.iteration % 1000 == 0:
         sync_networks(value_net, target_net)
@@ -79,16 +81,24 @@ if __name__ == "__main__":
             "truncated": {},
         },
     )
-    optimizer = optim.Adam(value_net.parameters(), lr=0.001)
-    scheduler = CosineAnnealingLR(optimizer, T_max=100000, eta_min=0.00001)
+    optimizer = optim.Adam(value_net.parameters(), lr=0.0001)
 
     # Reinforcement Learning
     engine = Engine(process_batch)
     agent = ValueAgent(
-        action_selector=EpsilonGreedyActionSelector(0.1),
+        action_selector=EpsilonGreedyActionSelector(
+            start_val=1.0, end_val=0.01, steps=250000
+        ),
         device=device,
         value_net=value_net,
     )
+    eval_agent = ValueAgent(
+        action_selector=ArgmaxActionSelector(),
+        device=device,
+        value_net=value_net,
+    )
+    eval_env = gym.make("CartPole-v1")
+    render_env = gym.make("CartPole-v1", render_mode="rgb_array")
     transition_generator = TransitionExperienceGenerator(env, agent)
     exp_gen = RecordEpisodeStatistics(transition_generator, engine)
     exp_gen = InteractionTimingHandler(exp_gen, engine)
@@ -96,6 +106,26 @@ if __name__ == "__main__":
     # Call attach logging handlers()
     # Then pass hyra config to the logging config attach
     # This will specify how all the loggers should be configured
+
+    # Evaluation
+    engine.add_event_handler(
+        event_name=Events.ITERATION_COMPLETED(every=1000),
+        handler=EvalHandler(
+            eval_agent,
+            eval_env,
+            success_transform=lambda rtn: int(rtn == 500),
+        ),
+    )
+
+    # Epsilon
+    engine.add_event_handler(
+        event_name=Events.ITERATION_COMPLETED(every=1000),
+        handler=EpsilonRecorderHandler(agent),
+    )
+    engine.add_event_handler(
+        event_name=Events.ITERATION_COMPLETED,
+        handler=EpsilonDecayHandler(agent),
+    )
 
     # Logging
     tb_logger = TensorboardLogger(log_dir="logs")
@@ -117,7 +147,26 @@ if __name__ == "__main__":
     tb_logger.attach(
         engine,
         log_handler=tbh.ScalarHandler(
-            "interaction_time", global_step_transform, "1-training"
+            "interactions_per_second", global_step_transform, "1-training"
+        ),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler("epsilon", global_step_transform, "1-training"),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
+
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler("eval_returns", global_step_transform, "2-eval"),
+        event_name=Events.ITERATION_COMPLETED(every=100),
+    )
+
+    tb_logger.attach(
+        engine,
+        log_handler=tbh.ScalarHandler(
+            "eval_success_rate", global_step_transform, "2-eval"
         ),
         event_name=Events.ITERATION_COMPLETED(every=100),
     )
@@ -154,6 +203,16 @@ if __name__ == "__main__":
         optimizer=optimizer,
         param_name="lr",
         tag="1-training",
+    )
+
+    tb_logger.attach(
+        engine,
+        event_name=Events.ITERATION_COMPLETED(every=10000),
+        log_handler=tbh.RecordEpisodeHandler(
+            agent=agent,
+            env=render_env,
+            global_step_transform=global_step_transform,
+        ),
     )
 
     # Checkpointing

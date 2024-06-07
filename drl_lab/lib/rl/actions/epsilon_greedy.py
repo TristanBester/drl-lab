@@ -5,8 +5,15 @@ from drl_lab.lib.rl.interfaces import ActionSelector
 
 
 class EpsilonGreedyActionSelector(ActionSelector):
-    def __init__(self, epsilon: float):
-        self.epsilon = epsilon
+    def __init__(self, start_val: float, end_val: float, steps: float):
+        self.epsilon = start_val
+        self.end_val = end_val
+        self.steps = steps
+        self.decay = (start_val - end_val) / steps
+
+    def decay_epsilon(self):
+        """Decay epsilon."""
+        self.epsilon = max(self.end_val, self.epsilon - self.decay)
 
     def __call__(self, info: torch.Tensor) -> torch.Tensor:
         """Select an action based on the given information."""
