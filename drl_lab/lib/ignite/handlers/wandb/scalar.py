@@ -11,8 +11,6 @@ class ScalarHandler(BaseHandler):
             f"iteration: {engine.state.iteration}\t{getattr(engine.state, self.scalar_name)}"
         )
 
-        print(self.global_step_transform(engine, event_name))
-
         logger.log(
             {
                 self.scalar_name: getattr(engine.state, self.scalar_name),

@@ -41,8 +41,6 @@ class RecordEpisodeHandler(BaseHandler):
         frames = frames.transpose(0, 3, 1, 2)
         frames = np.expand_dims(frames, axis=0)
 
-        print(frames.shape)
-
         logger.writer.add_video(
             tag="episode",
             vid_tensor=frames,
